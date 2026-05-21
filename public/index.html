@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"> 
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+    <div id="loginbox">
+
+    <input type="text"
+    id="username"
+    placeholder="Enter Username">
+
+    <button onclick="login()">
+        Login
+    </button>
+
+</div>
+
+<div id="quizbox">
+    <button onclick="darkmode()">
+        Dark Mode🌑
+    </button>
+    <h1 id="welcome"></h1>
+
+    <h1>Quiz App</h1>
+    <h2 id="topicname"></h2>
+    <h3 id="counter"></h3>
+    <h3 id="timer"></h3>
+
+    <div id ="topics"> 
+        <button onclick="selecttopic('CS')">Computer Science🖥️</button> 
+        <button onclick="selecttopic('Maths')">Maths➕</button>
+        <button onclick="selecttopic('GK')">GK🧭</button>
+        <button onclick="selecttopic('Physics')">Physics🌍</button>   
+        </div>
+
+    <button id="startbtn" onclick="startquiz()">
+        Start Quiz
+    </button>
+
+    <h2 id="question"></h2>
+
+    <div id="options"></div>
+
+    <h3 id="result"></h3>
+    <h3 id="score">Score:0</h3>
+
+    <h3>Leaderboard📈</h3>
+    <div id="leaderboard"></div>
+
+    <button id="nextbtn"
+    onclick="nextquestion()" disabled>
+        Next Questtion
+    </button>
+
+    <button onclick="restartquiz()">
+        Restart Quiz
+    </button>
+    </div>
+    </div>
+    <script src="script.js"></script>
+
+</body>
+
+</html>

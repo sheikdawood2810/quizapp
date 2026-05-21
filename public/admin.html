@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+<div id="adminbox" style="background:var(--card);border:1px solid var(--border);border-radius:24px;padding:44px 40px 40px;">
+
+    <h1>Admin Panel ⚙️</h1>
+
+    <input type="password" id="adminpass" placeholder="Enter Admin Password">
+    <button onclick="verifyAdmin()">Login</button>
+
+    <div id="adminform" style="display:none; margin-top:20px;">
+        <h2>Add Question</h2>
+
+        <select id="topic" style="width:100%;padding:12px;margin:8px 0;border-radius:10px;background:var(--surface);color:var(--text);border:1px solid var(--border);">
+            <option value="CS">Computer Science 🖥️</option>
+            <option value="Maths">Maths ➕</option>
+            <option value="GK">GK 🧭</option>
+            <option value="Physics">Physics 🌍</option>
+        </select>
+
+        <input type="text" id="question" placeholder="Enter Question">
+        <input type="text" id="option1" placeholder="Option 1">
+        <input type="text" id="option2" placeholder="Option 2">
+        <input type="text" id="option3" placeholder="Option 3">
+        <input type="text" id="option4" placeholder="Option 4">
+        <input type="text" id="answer" placeholder="Correct Answer (must match one option exactly)">
+
+        <button onclick="addQuestion()" style="margin-top:12px;width:100%;">Add Question ✅</button>
+
+        <h2 style="margin-top:24px;">All Questions</h2>
+        <select id="filtertopic" onchange="loadQuestions()" style="width:100%;padding:12px;margin:8px 0;border-radius:10px;background:var(--surface);color:var(--text);border:1px solid var(--border);">
+            <option value="CS">Computer Science</option>
+            <option value="Maths">Maths</option>
+            <option value="GK">GK</option>
+            <option value="Physics">Physics</option>
+        </select>
+
+        <div id="questionlist" style="margin-top:12px;"></div>
+    </div>
+
+</div>
+</div>
+<script>
+    // simple admin password check (frontend only)
+    function verifyAdmin() {
+        const pass = document.getElementById("adminpass").value;
+        if(pass === "admin2810") {
+            document.getElementById("adminform").style.display = "block";
+            document.getElementById("adminpass").style.display = "none";
+            document.querySelector("button").style.display = "none";
+            loadQuestions();
+        } else {
+            alert("Wrong password!");
+        }
+    }
+
+    function addQuestion() {
+        const topic    = document.getElementById("topic").value;
+        const question = document.getElementById("question").value;
+        const option1  = document.getElementById("option1").value;
+        const option2  = document.getElementById("option2").value;
+        const option3  = document.getElementById("option3").value;
+        const option4  = document.getElementById("option4").value;
+        const answer   = document.getElementById("answer").value;
+
+        if(!question || !option1 || !option2 || !option3 || !option4 || !answer) {
+            alert("Please fill all fields!");
+            return;
+        }
+
+        fetch("/admin/addquestion", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ topic, question, option1, option2, option3, option4, answer })
+        })
+        .then(r => r.json())
+        .then(data => {
+            alert(data.message);
+            // clear fields
+            document.getElementById("question").value = "";
+            document.getElementById("option1").value  = "";
+            document.getElementById("option2").value  = "";
+            document.getElementById("option3").value  = "";
+            document.getElementById("option4").value  = "";
+            document.getElementById("answer").value   = "";
+            loadQuestions();
+        });
+    }
+
+    function loadQuestions() {
+        const topic = document.getElementById("filtertopic").value;
+        fetch("/questions/" + topic)
+        .then(r => r.json())
+        .then(data => {
+            let html = "";
+            data.forEach(q => {
+                html += `
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;">
+                    <p style="color:var(--text);font-weight:600;">${q.question}</p>
+                    <p style="color:var(--muted);font-size:.85rem;">
+                        1️⃣ ${q.option1} &nbsp;
+                        2️⃣ ${q.option2} &nbsp;
+                        3️⃣ ${q.option3} &nbsp;
+                        4️⃣ ${q.option4}
+                    </p>
+                    <p style="color:var(--green);font-size:.85rem;">✅ Answer: ${q.answer}</p>
+                    <button onclick="deleteQuestion(${q.id})" 
+                    style="margin-top:8px;padding:6px 14px;background:var(--accent2);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.75rem;">
+                        Delete 🗑️
+                    </button>
+                </div>`;
+            });
+            document.getElementById("questionlist").innerHTML = html || "<p style='color:var(--muted)'>No questions found.</p>";
+        });
+    }
+
+    function deleteQuestion(id) {
+        if(!confirm("Delete this question?")) return;
+        fetch("/admin/deletequestion/" + id, { method: "DELETE" })
+        .then(r => r.json())
+        .then(data => {
+            alert(data.message);
+            loadQuestions();
+        });
+    }
+</script>
+</body>
+</html>
