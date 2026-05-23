@@ -13,7 +13,9 @@ const db = mysql.createConnection({
     ssl: { rejectUnauthorized: false },
       waitForConnections: true,
        connectionLimit:    10,
-      queueLimit:         0
+      queueLimit:         0,
+     enableKeepAlive:  true,      
+    keepAliveInitialDelay: 0   
 });
 
  db.connect(function(error){ 
@@ -36,8 +38,11 @@ app.use(express.static("public"));
     const checksql = "SELECT * FROM users WHERE name = ?";
 
     db.query(checksql, [username], function(error, result){
-
-        if(result.length > 0){
+    if(error || !result){
+        res.json({ message: "Connection error, please try again" });
+        return;
+    }
+    if(result.length > 0){
 
             res.json({
                 message: "Welcome back " + username
