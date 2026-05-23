@@ -4,28 +4,50 @@ const mysql= require("mysql2");
 
 const app = express();
 
-const db = mysql.createConnection({
-    host:     process.env.DB_HOST,
-    user:     process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port:     process.env.DB_PORT,
-    ssl: { rejectUnauthorized: false },
-      waitForConnections: true,
-       connectionLimit:    10,
-      queueLimit:         0,
-     enableKeepAlive:  true,      
-    keepAliveInitialDelay: 0   
+const db = mysql.createPool({
+    host:              process.env.DB_HOST,
+    user:              process.env.DB_USER,
+    password:          process.env.DB_PASSWORD,
+    database:          process.env.DB_NAME,
+    port:              process.env.DB_PORT,
+    ssl:               { rejectUnauthorized: false },
+    waitForConnections: true,
+    connectionLimit:   10,
+    queueLimit:        0,
+    enableKeepAlive:   true,
+    keepAliveInitialDelay: 0
 });
 
- db.connect(function(error){ 
- if(error){
-    console.log("database not connected");
- }
- else{
-    console.log("connected to mysql");
- }
- });
+// ✅ test connection on startup
+db.getConnection(function(err, connection){
+    if(err){
+        console.log("database not connected:", err.message);
+    } else {
+        console.log("connected to mysql");
+        connection.release();
+    }
+});
+
+    db.connect(function(error){
+        if(error){
+            console.log("database not connected");
+            setTimeout(connectDB, 5000); 
+        } else {
+            console.log("connected to mysql");
+        }
+    });
+
+    db.on('error', function(err){
+        console.log("db error", err);
+        if(err.code === 'PROTOCOL_CONNECTION_LOST'){
+            connectDB(); 
+        }
+    });
+
+    return db;
+}
+
+const db = connectDB();
 
 app.use(express.json());
 
